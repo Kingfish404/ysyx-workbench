@@ -113,6 +113,9 @@ build_packed:
 	cp -r $(abspath ./vsrc/include)/*.svh \
 		  $(abspath ./vsrc/include/dpic_mock)/*.svh \
 		  $(abspath ./vsrc/include/npc)/*.svh $(YSYX_HOME)/npc/build/packed
+	cp scripts/packed.sh $(YSYX_HOME)/npc/build/packed && chmod +x $(YSYX_HOME)/npc/build/packed/packed.sh
+	cd $(YSYX_HOME)/npc/build/packed && \
+		./packed.sh
 
 sta:
 	echo $(MAKECMDGOALS)

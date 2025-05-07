@@ -182,8 +182,8 @@ module ysyx_bus #(
   end
 
   // read
-  logic [XLEN-1:0] sram_araddr;
-  assign sram_araddr = (
+  logic [XLEN-1:0] bus_araddr;
+  assign bus_araddr = (
     ({XLEN{state_load == LS_A}} & lsu_araddr) |
     ({XLEN{state_load == IF_A}} & ifu_araddr)
   );
@@ -195,7 +195,8 @@ module ysyx_bus #(
   assign clint_en = (lsu_araddr == `YSYX_BUS_RTC_ADDR) || (lsu_araddr == `YSYX_BUS_RTC_ADDR_UP);
   assign out_lsu_rdata = (
     {XLEN{lsu_arvalid}} &
-    (({XLEN{clint_en}} & out_clint_rdata) | ({XLEN{!clint_en}} & out_rdata))
+    (({XLEN{clint_en}} & out_clint_rdata) |
+     ({XLEN{!clint_en}} & out_rdata))
     );
   assign out_lsu_rvalid = (
     (state_load == LS_R || clint_arvalid) &&
@@ -218,7 +219,7 @@ module ysyx_bus #(
            (3'b000)
          );
   assign io_master_arlen = ifu_sdram_arburst ? 'h1 : 'h0;
-  assign io_master_araddr = sram_araddr;
+  assign io_master_araddr = bus_araddr;
   assign io_master_arvalid = !reset && (
            ((state_load == IF_A) && ifu_arvalid) |
            ((state_load == LS_A) && lsu_arvalid && !clint_en) // for new soc
@@ -298,7 +299,7 @@ module ysyx_bus #(
   ysyx_clint clint (
       .clock(clock),
       .reset(reset),
-      .araddr(sram_araddr),
+      .araddr(lsu_araddr),
       .arvalid(clint_arvalid),
       .out_arready(out_clint_arready),
       .out_rdata(out_clint_rdata),
